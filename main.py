@@ -5,6 +5,13 @@ import datetime
 import time
 import keyboard
 import copy
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QSystemTrayIcon, QMenu
+from PyQt6.QtCore import QTimer, QThread
+import sys
+
 
 class Main:
     def __init__(self, active_window=None):
@@ -20,7 +27,19 @@ class Main:
         self.inactive = 0
         self.opened = self.active + self.inactive
         self.today = date.today().strftime("%Y-%m-%d")
+        
+        self.timer = QTimer()
+        self.app = QApplication([])
+        self.window = QWidget()
+        self.window.setWindowTitle("Window Activity Dashboard")
+        self.layout = QVBoxLayout()
+        self.window.setLayout(self.layout)
 
+        self.tray = QSystemTrayIcon(self.window)
+        self.tray.setIcon(QIcon(""))
+        
+        
+    
     def get_active_window(self):
         window = pygetwindow.getActiveWindow()
         if window and window.title:
@@ -30,7 +49,8 @@ class Main:
             self.active_window = "Unknown"
             
     def get_opened_windows(self):
-        self.opened_windows = pygetwindow.getAllWindows().isMinized()
+        windows = pygetwindow.getAllWindows()
+        self.opened_windows = [w.title for w in windows if not w.isMinimized and w.title]
         for i in self.opened_windows:
             if self.today not in self.active_log:
                 self.active_log[self.today] = {}
@@ -77,18 +97,44 @@ class Main:
         with open('activity_log_human.json', 'w') as f:
             json.dump(log_copy, f, indent=4)
             
+    def update_tracking(self):
+        self.get_active_window()
+        self.get_opened_windows()
+        self.increment_active()
+        self.increment_inactive()
+        self.check_time()
+        self.insert()
+        self.export_with_timeformat()
+        
+class TrackingThread(QThread):
+    def __init__(self, app):
+        super().__init__()
+        self.app = app
+    
+    def run(self):
+        while True:
+            self.app.get_active_window()
+            self.app.get_opened_windows()
+            self.app.increment_active()
+            self.app.increment_inactive()
+            self.app.check_time()
+            self.app.insert()
+            self.app.export_with_timeformat()
+            if keyboard.is_pressed('a'):
+                print("The 'a' key is pressed!")
+                break  # Exit the loop after detection
+            
+            time.sleep(1)
+        
+    
+        
+            
 if __name__ == "__main__":
     app = Main()
-    while True:
-        app.get_active_window()
-        app.get_opened_windows()
-        app.increment_active()
-        app.increment_inactive()
-        app.check_time()
-        app.insert()
-        app.export_with_timeformat()
-        if keyboard.is_pressed('a'):
-            print("The 'a' key is pressed!")
-            break  # Exit the loop after detection
-        
-        time.sleep(1)
+    thread = TrackingThread(app)
+    thread.start()
+    app.timer.timeout.connect(app.update_tracking)
+    # app.timer.start(1000)
+    
+    app.window.show()
+    sys.exit(app.app.exec())
