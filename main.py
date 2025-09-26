@@ -6,7 +6,6 @@ import time
 import keyboard
 import copy
 
-
 class Main:
     def __init__(self, active_window=None):
         try:
@@ -22,8 +21,6 @@ class Main:
         self.opened = self.active + self.inactive
         self.today = date.today().strftime("%Y-%m-%d")
 
-        
-        
     def get_active_window(self):
         window = pygetwindow.getActiveWindow()
         if window and window.title:
@@ -58,30 +55,7 @@ class Main:
         for i in self.opened_windows:
             if i and i != self.active_window:
                 self.active_log[self.today][i]["Inactive"] += 1
-                
-
-    def count_active_time(self):
-        # Check if date in log
-        if self.today in self.active_log:
-            print(f"{self.today} is in Activity log, inserting window...")
-            if self.active_window in self.active_log[self.today]:
-                self.active_log[self.today][self.active_window] = {
-                    "Active": self.active,
-                    "Inactive": self.inactive,
-                    "Opened": self.opened
-                }
-            
-        else:
-            self.active_log[self.today] = {
-                self.active_window: {
-                    "Active": self.active, 
-                    "Inactive": self.inactive, 
-                    "Opened": self.opened 
-                }
-            }
-            
-        
-            
+                       
     def load_log(self):
         self.active_log[self.today][self.active_window] = {
             "Active": self.active,
@@ -103,7 +77,6 @@ class Main:
         with open('activity_log_human.json', 'w') as f:
             json.dump(log_copy, f, indent=4)
             
-
 if __name__ == "__main__":
     app = Main()
     while True:
@@ -112,7 +85,6 @@ if __name__ == "__main__":
         app.increment_active()
         app.increment_inactive()
         app.check_time()
-        app.count_active_time()
         app.insert()
         app.export_with_timeformat()
         if keyboard.is_pressed('a'):
@@ -120,5 +92,3 @@ if __name__ == "__main__":
             break  # Exit the loop after detection
         
         time.sleep(1)
-        
-

@@ -1,38 +1,38 @@
 {
     "2025-09-26": {
         "main.py - state-os - Visual Studio Code": {
-            "Active": "0:00:00",
-            "Inactive": "0:00:00",
+            "Active": "0:00:20",
+            "Inactive": "0:00:01",
             "Opened": "0:00:00"
         },
         "ChatGPT - Google Chrome": {
-            "Active": "0:00:00",
-            "Inactive": "0:00:06",
+            "Active": "0:00:01",
+            "Inactive": "0:00:25",
             "Opened": "0:00:00"
         },
         "Projects - File Explorer": {
             "Active": "0:00:00",
-            "Inactive": "0:00:06",
+            "Inactive": "0:00:26",
             "Opened": "0:00:00"
         },
         "NVIDIA GeForce Overlay": {
             "Active": "0:00:00",
-            "Inactive": "0:00:06",
+            "Inactive": "0:00:26",
             "Opened": "0:00:00"
         },
         "Settings": {
             "Active": "0:00:00",
-            "Inactive": "0:00:12",
+            "Inactive": "0:00:52",
             "Opened": "0:00:00"
         },
         "Windows Input Experience": {
             "Active": "0:00:00",
-            "Inactive": "0:00:06",
+            "Inactive": "0:00:26",
             "Opened": "0:00:00"
         },
         "Program Manager": {
             "Active": "0:00:00",
-            "Inactive": "0:00:06",
+            "Inactive": "0:00:26",
             "Opened": "0:00:00"
         }
     }
