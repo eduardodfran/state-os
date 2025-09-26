@@ -1,6 +1,10 @@
 import pygetwindow
 import json
 from datetime import date
+import datetime
+import time
+import keyboard
+import copy
 
 
 class Main:
@@ -42,6 +46,20 @@ class Main:
         if self.today in self.active_log:
             return self.today
         
+    def increment_active(self):
+        print("Active window for increment:", self.active_window)
+        print("All window keys:", list(self.active_log[self.today].keys()))
+        if self.active_window in self.active_log[self.today]:
+            self.active_log[self.today][self.active_window]["Active"] += 1
+        else:
+            print("Active window not found in log!")
+            
+    def increment_inactive(self):
+        for i in self.opened_windows:
+            if i and i != self.active_window:
+                self.active_log[self.today][i]["Inactive"] += 1
+                
+
     def count_active_time(self):
         # Check if date in log
         if self.today in self.active_log:
@@ -62,6 +80,8 @@ class Main:
                 }
             }
             
+        
+            
     def load_log(self):
         self.active_log[self.today][self.active_window] = {
             "Active": self.active,
@@ -73,13 +93,32 @@ class Main:
         with open('activity_log.json', 'w') as f:
             json.dump(self.active_log, f, indent=4)
             
+    def export_with_timeformat(self):
+        log_copy = copy.deepcopy(self.active_log)
+        for day in log_copy:
+            for win in log_copy[day]:
+                for stat in ["Active", "Inactive", "Opened"]:
+                    seconds = log_copy[day][win][stat]
+                    log_copy[day][win][stat] = str(datetime.timedelta(seconds=seconds))
+        with open('activity_log_human.json', 'w') as f:
+            json.dump(log_copy, f, indent=4)
             
 
 if __name__ == "__main__":
     app = Main()
-    app.get_opened_windows()
-    app.get_active_window()
-    app.check_time()
-    app.count_active_time()
-    app.insert()
-    
+    while True:
+        app.get_active_window()
+        app.get_opened_windows()
+        app.increment_active()
+        app.increment_inactive()
+        app.check_time()
+        app.count_active_time()
+        app.insert()
+        app.export_with_timeformat()
+        if keyboard.is_pressed('a'):
+            print("The 'a' key is pressed!")
+            break  # Exit the loop after detection
+        
+        time.sleep(1)
+        
+
