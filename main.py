@@ -30,7 +30,7 @@ class Main:
             self.active_window = "Unknown"
             
     def get_opened_windows(self):
-        self.opened_windows = pygetwindow.getAllTitles()
+        self.opened_windows = pygetwindow.getAllWindows().isMinized()
         for i in self.opened_windows:
             if self.today not in self.active_log:
                 self.active_log[self.today] = {}
