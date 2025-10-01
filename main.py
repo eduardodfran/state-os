@@ -8,10 +8,6 @@ import copy
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QSystemTrayIcon, QMenu
-from PyQt6.QtCore import QTimer, QThread
-import sys
-
 
 class Main:
     def __init__(self, active_window=None):
@@ -28,18 +24,7 @@ class Main:
         self.opened = self.active + self.inactive
         self.today = date.today().strftime("%Y-%m-%d")
         
-        self.timer = QTimer()
-        self.app = QApplication([])
-        self.window = QWidget()
-        self.window.setWindowTitle("Window Activity Dashboard")
-        self.layout = QVBoxLayout()
-        self.window.setLayout(self.layout)
-
-        self.tray = QSystemTrayIcon(self.window)
-        self.tray.setIcon(QIcon(""))
         
-        
-    
     def get_active_window(self):
         window = pygetwindow.getActiveWindow()
         if window and window.title:
@@ -57,26 +42,30 @@ class Main:
             if i and i not in self.active_log[self.today]:
                 self.active_log[self.today][i] = {"Active": 0, "Inactive": 0, "Opened": 0}
                 
-        
     def check_time(self):
         print(self.today)
         if self.today in self.active_log:
             return self.today
         
     def increment_active(self):
-        print("Active window for increment:", self.active_window)
-        print("All window keys:", list(self.active_log[self.today].keys()))
-        if self.active_window in self.active_log[self.today]:
-            self.active_log[self.today][self.active_window]["Active"] += 1
+        if self.today in self.active_log:
+            if self.active_window in self.active_log[self.today]:
+                self.active_log[self.today][self.active_window]["Active"] += 1
+            else:
+                print("Active window not found in log!")
         else:
-            print("Active window not found in log!")
+            print("No entry for today in active_log.")
             
     def increment_inactive(self):
+        if self.today not in self.active_log:
+            return
         for i in self.opened_windows:
             if i and i != self.active_window:
                 self.active_log[self.today][i]["Inactive"] += 1
                        
     def load_log(self):
+        if self.today not in self.active_log:
+            self.active_log[self.today] = {}
         self.active_log[self.today][self.active_window] = {
             "Active": self.active,
             "Inactive": self.inactive,
@@ -123,12 +112,8 @@ class TrackingThread(QThread):
             if keyboard.is_pressed('a'):
                 print("The 'a' key is pressed!")
                 break  # Exit the loop after detection
-            
             time.sleep(1)
         
-    
-        
-            
 if __name__ == "__main__":
     app = Main()
     thread = TrackingThread(app)
@@ -136,5 +121,27 @@ if __name__ == "__main__":
     app.timer.timeout.connect(app.update_tracking)
     # app.timer.start(1000)
     
-    app.window.show()
+    # show the separated UI window
+    app.ui.window.show()
     sys.exit(app.app.exec())
+    def __init__(self, app):
+        super().__init__()
+        self.app = app
+    
+    def run(self):
+        while True:
+            self.app.get_active_window()
+            self.app.get_opened_windows()
+            self.app.increment_active()
+            self.app.increment_inactive()
+            self.app.check_time()
+            self.app.insert()
+            self.app.export_with_timeformat()
+            if keyboard.is_pressed('a'):
+                print("The 'a' key is pressed!")
+                break  # Exit the loop after detection
+            
+            time.sleep(1)
+        
+    
+        
